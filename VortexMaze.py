@@ -3,7 +3,7 @@ from Engine.Vortex import *
 import random
 
 # Initialize Vortex
-vortex = Vortex(PrivateKey="2152391d2137d819357b7668335c39aa3b47ea83ea204d7865c774f8083c6a77")
+vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
 
 # List of possible background textures
 background_textures = ['brick', 'stone', 'wood']

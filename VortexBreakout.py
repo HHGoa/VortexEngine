@@ -1,7 +1,7 @@
 from Engine.Vortex import Vortex
 from Engine.Vortex import *
 
-vortex = Vortex(PrivateKey="0x0ca8a8b46e83400f942a5a6889f88896dcfe5d71619a0a8a23533d0293c7c9f5")
+vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
 
 # 1. Build 4 walls
 ceiling = vortex.Object(model='quad', x=0, y=4, scale=(16, 0.2), collider='box', color=vortex.color("orange"))

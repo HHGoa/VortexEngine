@@ -1,7 +1,8 @@
 from Engine.Vortex import Vortex
 from Engine.Vortex import *
 
-vortex = Vortex(PrivateKey="2152391d2137d819357b7668335c39aa3b47ea83ea204d7865c774f8083c6a77")
+# Initialize Vortex
+vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
 
 # 1. Create the Tic Tac Toe grid
 grid_size = 3
@@ -11,14 +12,14 @@ grid = []
 for x in range(grid_size):
     row = []
     for y in range(grid_size):
-        cell = vortex.Object(model='quad', x=(x-grid_size/2)*cell_size, y=(y-grid_size/2)*cell_size, scale=(cell_size, cell_size), collider='box', color=vortex.color("white"))
+        cell = vortex.Object(model='quad', x=(x - grid_size / 2) * cell_size, y=(y - grid_size / 2) * cell_size, scale=(cell_size, cell_size), collider='box', color=vortex.color("black"))
         row.append(cell)
     grid.append(row)
 
 # Add grid lines for better visibility
 for i in range(grid_size + 1):
-    vortex.Object(model='quad', x=(i - grid_size/2 - 0.5) * cell_size, y=0, scale=(0.1, grid_size * cell_size), color=vortex.color("black"))
-    vortex.Object(model='quad', x=0, y=(i - grid_size/2 - 0.5) * cell_size, scale=(grid_size * cell_size, 0.1), color=vortex.color("black"))
+    vortex.Object(model='quad', x=(i - grid_size / 2 - 0.5) * cell_size, y=0, scale=(0.1, grid_size * cell_size), color=vortex.color("white"))
+    vortex.Object(model='quad', x=0, y=(i - grid_size / 2 - 0.5) * cell_size, scale=(grid_size * cell_size, 0.1), color=vortex.color("white"))
 
 # 2. Initialize game state
 current_player = 'X'
@@ -27,9 +28,9 @@ game_over = False
 scores = {'X': 0, 'O': 0}
 
 # 3. Display Title and Score
-title = vortex.Label(text='Tic Tac Toe', scale=2, y=6, background=True, color=vortex.color("blue"))
-score_label = vortex.Label(text=f'X: {scores["X"]} - O: {scores["O"]}', scale=1.5, y=5, background=True, color=vortex.color("black"))
-current_player_label = vortex.Label(text=f'Current Player: {current_player}', scale=1.5, y=4, background=True, color=vortex.color("green"))
+title = vortex.Label(text='Tic Tac Toe', scale=2, y=6, background=True, color=vortex.color("white"))
+score_label = vortex.Label(text=f'X: {scores["X"]} - O: {scores["O"]}', scale=1.5, y=5, background=True, color=vortex.color("white"))
+current_player_label = vortex.Label(text=f'Current Player: {current_player}', scale=1.5, y=4, background=True, color=vortex.color("white"))
 
 # 4. Function to check for a win
 def check_win(player):
@@ -40,7 +41,7 @@ def check_win(player):
     for col in range(grid_size):
         if all(board[row][col] == player for row in range(grid_size)):
             return True
-    if all(board[i][i] == player for i in range(grid_size)) or all(board[i][grid_size-1-i] == player for i in range(grid_size)):
+    if all(board[i][i] == player for i in range(grid_size)) or all(board[i][grid_size - 1 - i] == player for i in range(grid_size)):
         return True
     return False
 
@@ -50,7 +51,7 @@ def on_click(cell, x, y):
     if game_over or board[x][y]:
         return
     board[x][y] = current_player
-    cell.color = vortex.color("blue" if current_player == 'X' else "red")
+    cell.color = vortex.color("red" if current_player == 'X' else "blue")
     if check_win(current_player):
         scores[current_player] += 1
         score_label.text = f'X: {scores["X"]} - O: {scores["O"]}'
@@ -70,7 +71,7 @@ def reset_game():
     global board, current_player, game_over
     for x in range(grid_size):
         for y in range(grid_size):
-            grid[x][y].color = vortex.color("white")
+            grid[x][y].color = vortex.color("black")
     board = [['' for _ in range(grid_size)] for _ in range(grid_size)]
     current_player = 'X'
     game_over = False
