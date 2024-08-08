@@ -47,12 +47,9 @@ class Vortex:
             self.Address = Address
             self.Chain = Chain
             self.app = Ursina(title="Vortex", **kwargs)
-<<<<<<< HEAD
-            OuputJSON.update({"config": {"Address": Address, "Chain": Chain, "appInstance": str(self.app)}})
-=======
+
             # OuputJSON.update({"config": {"PrivateKey": PrivateKey, "Address": Address, "Chain": Chain, "appInstance": str(self.app)}})
             OuputJSON.update({"config": {"Chain": Chain, "appInstance": str(self.app)}})
->>>>>>> c04222f2b3f868ddcebf17ee63e637d2c9cb52b4
             print(OuputJSON)
 
     def Object(self, **kwargs):
