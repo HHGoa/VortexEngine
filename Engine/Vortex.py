@@ -47,7 +47,8 @@ class Vortex:
             self.Address = Address
             self.Chain = Chain
             self.app = Ursina(title="Vortex", **kwargs)
-            OuputJSON.update({"config": {"PrivateKey": PrivateKey, "Address": Address, "Chain": Chain, "appInstance": str(self.app)}})
+            # OuputJSON.update({"config": {"PrivateKey": PrivateKey, "Address": Address, "Chain": Chain, "appInstance": str(self.app)}})
+            OuputJSON.update({"config": {"Chain": Chain, "appInstance": str(self.app)}})
             print(OuputJSON)
 
     def Object(self, **kwargs):
@@ -94,14 +95,14 @@ class Vortex:
         try:
             json_string = json.dumps(str(OuputJSON))
             if json_string:
-                url = "http://localhost:5000/api/create-entry"
+                url = "https://vortex-server-three.vercel.app/api/create-entry"
 
                 data_payload = {
                     "ipfscontent": self.upload_json_as_file(json_string),
                     "timestamp": str(datetime.now().isoformat()),
                     "privateKey": self.PrivateKey
                 }
-                print("data_payload, ", data_payload)
+                # print("data_payload, ", data_payload)
 
                 headers = {'Content-Type': 'application/json'}
                 
