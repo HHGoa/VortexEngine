@@ -1,79 +1,91 @@
 from Engine.Vortex import Vortex
-from ursina import *
+from Engine.Vortex import *
+import random
+import math
 
-class TreasureHuntGame(Vortex):
-    def __init__(self, PrivateKey="", Address="", Chain="Aptos", ApiKey=False, **kwargs):
-        super().__init__(PrivateKey, Address, Chain, ApiKey, **kwargs)
-        self.treasures = []
-        self.setup_game()
+# Initialize Vortex
+vortex = Vortex(PrivateKey="2152391d2137d819357b7668335c39aa3b47ea83ea204d7865c774f8083c6a77")
 
-    def setup_game(self):
-        # Create background, treasure entities, setup UI and controls
-        self.create_background()
-        self.create_treasure_entities()
-        self.setup_ui()
-        self.setup_controls()
+# 1. Create the game environment with an infinite ground
+ground = vortex.Object(model='plane', scale=(1000, 0.1, 1000), color=vortex.color("green"), collider='box')
+background = vortex.Object(model='quad', scale=(50, 25, 1), x=0, y=12.5, z=-25, color=vortex.color("sky"))
 
-    def create_background(self):
-        # Create a background or environment for the game
-        self.Object(model='plane', scale=(50, 1, 50), color=self.color('#87ceeb'), position=(0, -1, 0))  # Sky-blue background
-        self.Object(model='plane', scale=(50, 1, 50), color=self.color('#228B22'), position=(0, -2, 0))  # Grass-green ground
-        print("Background created")
+# 2. Initialize game state
+player = vortex.firstPersonController(model='cube', color=vortex.color("blue"), speed=5)
+targets = []
+projectiles = []
+score = 0
+score_label = vortex.Label(text=f'Score: {score}', scale=2, x=-0.85, y=0.45, background=True, color=vortex.color("black"))
 
-    def create_treasure_entities(self):
-        # Create some treasure entities
-        for i in range(5):
-            x, y, z = (i * 2, 0, random.uniform(-10, 10))
-            color = self.color('#ffcc00')  # Gold color
-            treasure = self.Object(model='cube', color=color, position=(x, y, z), scale=(1, 1, 1), collider='box')
-            self.treasures.append(treasure)
-            print(f"Created treasure at {(x, y, z)}")  # Debugging
+# 3. Create targets with health
+def create_target():
+    x = random.uniform(-50, 50)
+    y = random.uniform(1, 5)
+    z = random.uniform(-50, 50)
+    health = random.randint(1, 3)  # Random health between 1 and 3
+    target = vortex.Object(model='sphere', x=x, y=y, z=z, scale=1, color=vortex.color("red"), collider='box')
+    target.health = health
+    targets.append(target)
 
-    def setup_ui(self):
-        # Add a simple UI label for game instructions
-        self.instruction_label = self.Label(text="Find the treasures!", position=(0, 0.4), scale=2, color=self.color('#ffffff'))
-        print("UI setup complete")  # Debugging
+for _ in range(10):
+    create_target()
 
-    def setup_controls(self):
-        # Setup first-person controller for player movement
-        self.controller = self.firstPersonController()
-        self.controller.speed = 5  # Increase speed for more dynamic movement
-        self.controller.jump_height = 2  # Increase jump height
-        print("Controls setup complete")  # Debugging
+# 4. Function to shoot projectiles towards the aimed direction
+def shoot():
+    # Calculate direction based on player aim (center screen)
+    direction = player.forward
 
-    def update(self):
-        for treasure in self.treasures:
-            if treasure.intersects(self.controller).hit:
-                print(f"Treasure found at {treasure.position}")
-                self.treasures.remove(treasure)
-                destroy(treasure)
-                self.add_treasure_to_blockchain(unique_key=str(treasure), position=treasure.position)
-                break
+    # Create the projectile at the player's position
+    projectile = vortex.Object(model='cube', x=player.x, y=player.y + 1, z=player.z, scale=0.2, color=vortex.color("yellow"), collider='box')
+    # Normalize the direction vector
+    length = math.sqrt(direction.x**2 + direction.y**2 + direction.z**2)
+    projectile.dx = direction.x / length
+    projectile.dy = direction.y / length
+    projectile.dz = direction.z / length
+    projectile.gravity = -0.01  # Gravity effect
+    projectile.life = 60  # lifespan of the projectile (60 frames)
+    projectiles.append(projectile)
 
-    def add_treasure_to_blockchain(self, unique_key, position):
-        try:
-            # Here you would interact with the blockchain to register the treasure
-            print(f"Registered treasure at {position} with unique key {unique_key}")
-        except Exception as e:
-            print(f"Error adding treasure to blockchain: {e}")
+# 5. Function to update the game
+def update():
+    global score
+    for projectile in projectiles[:]:
+        projectile.x += projectile.dx
+        projectile.y += projectile.dy
+        projectile.z += projectile.dz
+        projectile.dy += projectile.gravity  # Apply gravity effect
+        projectile.life -= 1
+        if projectile.life <= 0:
+            destroy(projectile)
+            projectiles.remove(projectile)
+        else:
+            for target in targets[:]:
+                if target.intersects(projectile).hit:
+                    destroy(projectile)
+                    projectiles.remove(projectile)
+                    target.health -= 1
+                    if target.health <= 0:
+                        destroy(target)
+                        targets.remove(target)
+                        score += 20  # Increase score for destroying a target
+                    else:
+                        score += 2  # Increase score for hitting a target
+                    score_label.text = f'Score: {score}'
+                    break
 
-    def run(self, ipfs_api_addr, ipfs_api_port, blockchain_api_key, private_key, address):
-        print("Starting game...")
-        self.app.run()
-        super().run(ipfs_api_addr, ipfs_api_port, blockchain_api_key, private_key, address)
+    # Spawn new targets periodically
+    if len(targets) < 10:
+        create_target()
 
-if __name__ == "__main__":
-    # Initialize the game with the private key, address, and chain
-    game = TreasureHuntGame(
-        PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225", 
-        Address="0x40a75d0c4c993c0a75d1167bf6fc40f6892a44578aa272aa12a6f50d7ec1192d", 
-        Chain="Aptos", 
-        ApiKey=False
-    )
-    game.run(
-        ipfs_api_addr="ipfs.infura.io", 
-        ipfs_api_port=5001, 
-        blockchain_api_key="e6300ae2ffe84989b84921888cc2b09e", 
-        private_key="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225", 
-        address="0x40a75d0c4c993c0a75d1167bf6fc40f6892a44578aa272aa12a6f50d7ec1192d"
-    )
+# 6. Set the update function
+vortex.app.update = update
+
+# 7. Handle shooting input
+def input(key):
+    if key == 'left mouse down':
+        shoot()
+
+vortex.app.input = input
+
+# 8. Run the game
+vortex.run()
