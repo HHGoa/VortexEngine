@@ -1,7 +1,7 @@
 from Engine.Vortex import Vortex
 from Engine.Vortex import *
 
-vortex = Vortex()
+vortex = Vortex(PrivateKey="2152391d2137d819357b7668335c39aa3b47ea83ea204d7865c774f8083c6a77")
 
 # 1. Build 4 walls
 ceiling = vortex.Object(model='quad', x=0, y=4, scale=(16, 0.2), collider='box', color=vortex.color("orange"))
@@ -57,10 +57,12 @@ def update():
     if ball.y < -5:
         message = vortex.Label(text='You LOST', scale=2, origin=(0, 0), background=True, color=vortex.color("blue"))
         vortex.UpdateBlock()
+        print("working..")
         application.pause()
     
     if len(bricks) == 0:
         message = vortex.Label(text='You WON', scale=2, origin=(0, 0), background=True, color=vortex.color("blue"))
         application.pause()
+
 
 vortex.run()
