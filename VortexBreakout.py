@@ -3,7 +3,7 @@ from Engine.Vortex import *
 
 vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
 
-# 1. Build 4 walls
+# 1. Build 4 walls  
 ceiling = vortex.Object(model='quad', x=0, y=4, scale=(16, 0.2), collider='box', color=vortex.color("orange"))
 left_wall = vortex.Object(model='quad', x=-7.2, y=0, scale=(0.2, 10), collider='box', color=vortex.color("orange"))
 right_wall = vortex.Object(model='quad', x=7.2, y=0, scale=(0.2, 10), collider='box', color=vortex.color("orange"))

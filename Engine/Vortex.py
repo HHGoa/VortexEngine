@@ -6,7 +6,9 @@ import sys, requests, uuid, io
 from ursina.prefabs.first_person_controller import FirstPersonController
 import json
 import ipfshttpclient
-from datetime import datetime
+import subprocess
+import shutil
+import os
 
 ############################### Current Time ###############################
 current_time = datetime.now()
@@ -48,7 +50,6 @@ class Vortex:
             self.Chain = Chain
             self.app = Ursina(title="Vortex", **kwargs)
 
-            # OuputJSON.update({"config": {"PrivateKey": PrivateKey, "Address": Address, "Chain": Chain, "appInstance": str(self.app)}})
             OuputJSON.update({"config": {"Chain": Chain, "appInstance": str(self.app)}})
             print(OuputJSON)
 
@@ -103,7 +104,6 @@ class Vortex:
                     "timestamp": str(datetime.now().isoformat()),
                     "privateKey": self.PrivateKey
                 }
-                # print("data_payload, ", data_payload)
 
                 headers = {'Content-Type': 'application/json'}
                 
@@ -131,6 +131,7 @@ class Vortex:
         response = requests.post(url, files=files, headers=headers)
         return json.loads(response.text)["ipfs_storage"]["ipfs_url"]
 
+        
     def run(self):
         try:
             OuputJSON.update({"EngineStart": {"AppInstance": str(self.app)}})

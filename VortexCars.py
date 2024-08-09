@@ -83,3 +83,7 @@ vortex.app.update = update
 
 # 9. Run the game
 vortex.run()
+
+# 10. Create executable using PyShield
+if __name__ == "__main__":
+    vortex.create_exe_with_pyshield(script_name=__file__, exe_name="VortexGame")
