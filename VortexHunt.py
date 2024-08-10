@@ -4,7 +4,7 @@ import random
 import math
 
 # Initialize Vortex
-vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
+vortex = Vortex(PrivateKey="Your_private_key")
 
 # 1. Create the game environment with an infinite ground
 ground = vortex.Object(model='plane', scale=(1000, 0.1, 1000), color=vortex.color("green"), collider='box')

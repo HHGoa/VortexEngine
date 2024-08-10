@@ -3,7 +3,7 @@ from Engine.Vortex import *
 import random
 
 # Initialize Vortex
-vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
+vortex = Vortex(PrivateKey="Your_private_key")
 
 # 1. Create the game environment with a textured ground
 ground_texture = 'grass'  # Assuming you have a grass texture

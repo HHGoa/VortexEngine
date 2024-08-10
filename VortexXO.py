@@ -2,7 +2,7 @@ from Engine.Vortex import Vortex
 from Engine.Vortex import *
 
 # Initialize Vortex
-vortex = Vortex(PrivateKey="0xa4b20ab4faf41ee253f57dc8c5724a0aec3e7efa27600ffb83ec4d64be097225")
+vortex = Vortex(PrivateKey="Your_Private_Key")
 
 # 1. Create the Tic Tac Toe grid
 grid_size = 3

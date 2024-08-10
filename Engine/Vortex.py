@@ -5,7 +5,6 @@ from datetime import datetime
 import sys, requests, uuid, io
 from ursina.prefabs.first_person_controller import FirstPersonController
 import json
-import ipfshttpclient
 import subprocess
 import shutil
 import os
@@ -18,29 +17,29 @@ current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 ############################### Global Data ################################
 
 ChainApi = {
-    "Aptos": "https://api.aptos.dev/v1",
-    "polygon": "",
-    "matic": "",
+    "Aptos": "https://vortex-server-three.vercel.app/api/create-entry",
+    "Polygon": "https://vortex-server-three.vercel.app/addEntity"
 }
 OuputJSON = dict()
 #--------------------------------------------------------------------------
 TempObjects = list()
 TempColors = list()
-TempFPS = list()
+TempFPS = list()    
 TempActions = list()  # Store game actions here
 #--------------------------------------------------------------------------
 
-ApiCheckerUrl = "https://vortex-server.vercel.app/get-details/"
+ApiCheckerUrl = ["https://vortex-server-three.vercel.app/api/create-entry", "https://vortex-server-three.vercel.app/addEntity/"]
 
 ############################################################################
 
 class Vortex:
-    def __init__(self, PrivateKey="", Address="", Chain="Aptos", ApiKey=False, **kwargs):
+    def __init__(self, PrivateKey="", Address="", Chain=None, ApiKey=False, **kwargs):
         if ApiKey:
             try:
-                response = requests.get(ApiCheckerUrl+ApiKey)
-                response.raise_for_status()
-                return response.json()
+                for url in ApiCheckerUrl:
+                    response = requests.get(url + ApiKey)
+                    response.raise_for_status()
+                    print(f"API response from {url}: {response.json()}")
             except requests.exceptions.RequestException as e:
                 print(f"An error occurred: {e}")
                 return None
@@ -97,21 +96,28 @@ class Vortex:
         try:
             json_string = json.dumps(str(OuputJSON))
             if json_string:
-                url = "https://vortex-server-three.vercel.app/api/create-entry"
-
-                data_payload = {
-                    "ipfscontent": self.upload_json_as_file(json_string),
-                    "timestamp": str(datetime.now().isoformat()),
-                    "privateKey": self.PrivateKey
-                }
-
-                headers = {'Content-Type': 'application/json'}
+                ipfs_url = self.upload_json_as_file(json_string)
                 
-                # Make the POST request
-                response = requests.post(url, json=data_payload, headers=headers)
-                
-                # Print the response
-                print(response.status_code, response.text)
+                for chain, url in ChainApi.items():
+                    if chain == "Polygon":
+                        data_payload = {
+                            "dataUri": ipfs_url,
+                            "privateKey": self.PrivateKey
+                        }
+                    else:
+                        data_payload = {
+                            "ipfscontent": ipfs_url,
+                            "timestamp": str(datetime.now().isoformat()),
+                            "privateKey": self.PrivateKey
+                        }
+
+                    headers = {'Content-Type': 'application/json'}
+                    
+                    # Make the POST request to each chain's API
+                    response = requests.post(url, json=data_payload, headers=headers)
+                    
+                    # Print the response
+                    print(f"Response from {chain} API ({url}):", response.status_code, response.text)
             else:
                 print(":)")
         except TypeError as e:
@@ -128,8 +134,24 @@ class Vortex:
             "accept": "application/json",
             "X-API-Key": "sk_live_0c7597d2-dd10-44c5-8488-fd60859c61f1"
         }        
+        
         response = requests.post(url, files=files, headers=headers)
-        return json.loads(response.text)["ipfs_storage"]["ipfs_url"]
+        
+        if response.status_code == 200:
+            try:
+                ipfs_response = response.json()
+                if "ipfs_storage" in ipfs_response and "ipfs_url" in ipfs_response["ipfs_storage"]:
+                    return ipfs_response["ipfs_storage"]["ipfs_url"]
+                else:
+                    print("Unexpected response format:", ipfs_response)
+                    return None
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON response: {e}")
+                print("Response text:", response.text)
+                return None
+        else:
+            print(f"Failed to upload file to IPFS: {response.status_code} - {response.text}")
+            return None
 
         
     def run(self):
